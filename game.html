@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Box</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #gameArea {
+            width: 300px; height: 300px; position: relative;
+            border: 2px solid black; margin: 20px auto; 
+        }
+        #box {
+            width: 50px; height: 50px; background: red; 
+            position: absolute; cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        #score { font-size: 20px; margin-top: 10px; }
+        #timer { font-size: 20px; color: blue; }
+        #startBtn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        .score-effect {
+            font-size: 25px; color: green; position: absolute;
+            opacity: 1; transition: opacity 0.5s, transform 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Catch the Box</h1>
+    <p>Klik kotak merah sebelum berpindah!</p>
+
+    <label for="timeInput">Atur Waktu (detik):</label>
+    <input type="number" id="timeInput" value="30" min="5">
+    <button id="startBtn" onclick="startGame()">Mulai</button>
+
+    <div id="gameArea">
+        <div id="box" onclick="increaseScore()"></div>
+    </div>
+    <p id="score">Skor: 0</p>
+    <p id="timer">Waktu: 0</p>
+
+    <script>
+        let score = 0;
+        let gameTime = 30;
+        let interval;
+        let countdown;
+        let isPlaying = false;
+
+        function moveBox() {
+            let box = document.getElementById("box");
+            let gameArea = document.getElementById("gameArea");
+            let maxX = gameArea.clientWidth - box.clientWidth;
+            let maxY = gameArea.clientHeight - box.clientHeight;
+
+            let newX = Math.floor(Math.random() * maxX);
+            let newY = Math.floor(Math.random() * maxY);
+
+            box.style.left = newX + "px";
+            box.style.top = newY + "px";
+        }
+
+        function increaseScore() {
+            if (!isPlaying) return;
+            score++;
+            document.getElementById("score").innerText = "Skor: " + score;
+
+            // Efek Skor Bertambah
+            let effect = document.createElement("div");
+            effect.innerText = "+1";
+            effect.classList.add("score-effect");
+            effect.style.left = event.clientX + "px";
+            effect.style.top = event.clientY + "px";
+            document.body.appendChild(effect);
+
+            setTimeout(() => {
+                effect.style.opacity = "0";
+                effect.style.transform = "translateY(-20px)";
+                setTimeout(() => effect.remove(), 500);
+            }, 100);
+
+            // Efek kotak membesar
+            let box = document.getElementById("box");
+            box.style.transform = "scale(1.2)";
+            setTimeout(() => box.style.transform = "scale(1)", 200);
+
+            moveBox();
+        }
+
+        function startGame() {
+            score = 0;
+            gameTime = parseInt(document.getElementById("timeInput").value);
+            document.getElementById("score").innerText = "Skor: " + score;
+            document.getElementById("timer").innerText = "Waktu: " + gameTime;
+            isPlaying = true;
+
+            clearInterval(interval);
+            clearInterval(countdown);
+            
+            moveBox();
+            interval = setInterval(moveBox, 1000);
+            countdown = setInterval(() => {
+                gameTime--;
+                document.getElementById("timer").innerText = "Waktu: " + gameTime;
+                if (gameTime <= 0) {
+                    clearInterval(interval);
+                    clearInterval(countdown);
+                    isPlaying = false;
+                    alert("Waktu habis! Skor akhir: " + score);
+                }
+            }, 1000);
+        }
+    </script>
+
+</body>
+</html>
